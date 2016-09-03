@@ -1,0 +1,13 @@
+{
+	"name": "maarten/rooster",
+	"description": "A API wrapper for the Xedule rooster",
+	"license": "MIT",
+	"require": {
+		"guzzlehttp/guzzle": "^6.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"App\\": "app/"
+		}
+	}
+}
