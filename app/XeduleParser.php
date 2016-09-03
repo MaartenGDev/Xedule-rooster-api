@@ -24,14 +24,25 @@ class XeduleParser implements XeduleParserInterface
         $this->document->loadHTML($data);
         $this->xpath = new DOMXPath($this->document);
     }
+    private function formatDate($date){
+        $parts = explode('-',$date);
+        $day = $parts[0];
+        $month = $parts[1];
+        $year = $parts[2];
 
+        return "{$month}/{$day}/{$year}";
+
+     }
     private function getDayDate($day)
     {
+        $dayItem = trim($this->xpath->query('//div[@class="dag width1cell"]')->item($day - 1)->nodeValue);
 
-        return $this->xpath->query('//div[@class="width1cell"]');
+        $dayAndDate = explode(' ',$dayItem);
+        $date = $dayAndDate[16];
+
+        return (object)['id' => (int)$day, 'name' => trim($dayAndDate[0]), 'date' => strtotime($this->formatDate($date)),'display_date' => $date];
     }
 
-    // Todo: move to helper file.
     private function contains($haystack, $needle)
     {
         return strpos($haystack, $needle) !== false;
@@ -74,21 +85,47 @@ class XeduleParser implements XeduleParserInterface
         $lessons = $this->xpath->query($query);
 
         $translation = [
-            'LesCode' => 'lesson',
             'LesTijden' => 'time',
             'AttendeeBlockColumn_1' => 'room',
             'AttendeeBlockColumn_2' => 'teacher'
         ];
 
         foreach ($lessons as $lesson) {
-            $lessonDetails = (object)['lesson' => '', 'time' => (object)['start' => 0, 'end' => 0], 'day' => 0, 'room' => '', 'teacher' => ''];
+            $lessonDetails = (object)
+            [
+                'lesson' => (object)
+                [
+                    'name' => '',
+                    'details' => (object)
+                    [
+                        'time' => (object)
+                        [
+                            'start' => 0,
+                            'end' => 0
+                        ],
+                        'day' => (object)
+                        [
+                            'id' => 0,
+                            'name' => '',
+                            'display_date' => '',
+                            'date' => ''
+                        ],
+                        'room' => '',
+                        'teacher' => ''
+                    ]
+                ]
+            ];
 
             $style = $lesson->getAttribute('style');
             $width = $this->getCssAttribute('left', $style);
             $day = $this->getDay($width);
 
-            $lessonDetails->day = $day;
-            $lessonDetails->date = $this->getDayDate($day);
+            $dayDetails = $this->getDayDate($day);
+
+            $lessonDetails->lesson->details->day->id = $dayDetails->id;
+            $lessonDetails->lesson->details->day->name = $dayDetails->name;
+            $lessonDetails->lesson->details->day->display_date = $dayDetails->display_date;
+            $lessonDetails->lesson->details->day->date = $dayDetails->date;
 
             foreach ($lesson->getElementsByTagName('div') as $detail) {
                 $value = trim($detail->nodeValue);
@@ -96,13 +133,16 @@ class XeduleParser implements XeduleParserInterface
 
                 if ($this->contains($class, 'LesTijden')) {
                     $startAndEnd = explode('-', $value);
-                    $lessonDetails->time->start = $startAndEnd[0];
-                    $lessonDetails->time->end = $startAndEnd[1];
+                    $lessonDetails->lesson->details->time->start = $startAndEnd[0];
+                    $lessonDetails->lesson->details->time->end = $startAndEnd[1];
                 }
 
-                if ($this->contains($class, 'LesCode') || $this->contains($class, 'AttendeeBlockColumn_1') || $this->contains($class, 'AttendeeBlockColumn_2')) {
+                if($this->contains($class,'LesCode')){
+                    $lessonDetails->lesson->name = $value;
+                }
+                if ($this->contains($class, 'AttendeeBlockColumn_1') || $this->contains($class, 'AttendeeBlockColumn_2')) {
                     $key = $translation[$class];
-                    $lessonDetails->$key = $value;
+                    $lessonDetails->lesson->details->$key = $value;
                 }
             }
             $this->week['data']['lessons'][] = $lessonDetails;
@@ -110,7 +150,8 @@ class XeduleParser implements XeduleParserInterface
         return $this;
     }
 
-    public function allWeek(){
+    public function allWeek()
+    {
         return $this->week;
     }
 

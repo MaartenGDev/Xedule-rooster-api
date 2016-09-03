@@ -9,7 +9,7 @@ $parser = new XeduleParser();
 
 $client = new Client($guzzle,$parser);
 
-$week = $client->getWeek(35);
+$week = $client->getWeek(36);
 
 echo json_encode($week);
 
