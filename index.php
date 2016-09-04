@@ -11,5 +11,6 @@ $client = new Client($guzzle,$parser);
 
 $week = $client->getWeek(36);
 
+header("Access-Control-Allow-Origin: *");
 echo json_encode($week);
 
