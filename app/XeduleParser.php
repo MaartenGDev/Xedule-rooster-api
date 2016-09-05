@@ -43,7 +43,13 @@ class XeduleParser implements XeduleParserInterface
         $dayAndDate = explode(' ', $dayItem);
         $date = $dayAndDate[16];
 
-        return (object)['id' => (int)$day, 'name' => trim($dayAndDate[0]), 'date' => strtotime($this->formatDate($date)), 'display_date' => $date];
+        return (object)[
+            'id' => (int)$day,
+            'name' => trim($dayAndDate[0]),
+            'date' => strtotime($this->formatDate($date)),
+            'raw_date' => $this->formatDate($date),
+            'display_date' => $date
+        ];
     }
 
     private function contains($haystack, $needle)
@@ -99,6 +105,7 @@ class XeduleParser implements XeduleParserInterface
                 'name' => '',
                 'details' => (object)
                 [
+                    'active' => false,
                     'time' => (object)
                     [
                         'start' => 0,
@@ -127,6 +134,8 @@ class XeduleParser implements XeduleParserInterface
             $lessonDetails->details->day->display_date = $dayDetails->display_date;
             $lessonDetails->details->day->date = $dayDetails->date;
 
+
+
             foreach ($lesson->getElementsByTagName('div') as $detail) {
                 $value = trim($detail->nodeValue);
                 $class = $detail->getAttribute('class');
@@ -135,6 +144,17 @@ class XeduleParser implements XeduleParserInterface
                     $startAndEnd = explode('-', $value);
                     $lessonDetails->details->time->start = $startAndEnd[0];
                     $lessonDetails->details->time->end = $startAndEnd[1];
+
+                    // Check if lesson is active
+                    $currentTime = microtime(true);
+
+                    $lessonStartTime = strtotime($dayDetails->raw_date . ' ' .$startAndEnd[0]);
+                    $lessonEndTime = strtotime($dayDetails->raw_date . ' ' .$startAndEnd[1]);
+
+                    if($currentTime >= $lessonStartTime && $currentTime <= $lessonEndTime){
+                        $lessonDetails->details->active = true;
+                    }
+
                 }
 
                 if ($this->contains($class, 'LesCode')) {

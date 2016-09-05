@@ -6,8 +6,11 @@ use GuzzleHttp\Client as GuzzleClient;
 
 $guzzle = new GuzzleClient();
 $parser = new XeduleParser();
+$cache = new Cache();
+$client = new Client($guzzle,$parser,$cache);
 
-$client = new Client($guzzle,$parser);
+
+$client->setGroup('95311OLVM4 (1)');
 
 $week = $client->getWeek(36);
 

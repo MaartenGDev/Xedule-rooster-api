@@ -11,19 +11,30 @@ class Client
     private $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36';
     private $baseUrl = 'https://roosters.xedule.nl/Attendee/ChangeWeek/';
 
-    private $class = '95311OLVM4%20(1)';
+    private $group = '';
     private $ordeId = 130;
-    private $week = 52257;
+    private $code = 52257;
     private $attId = 1;
 
     private $storage = 'rooster.html';
 
     private $result;
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
 
-    public function __construct(ClientInterface $client, XeduleParser $parser)
+    public function __construct(ClientInterface $client, XeduleParser $parser, CacheInterface $cache)
     {
+        date_default_timezone_set('Europe/Amsterdam');
+
         $this->client = $client;
         $this->parser = $parser;
+        $this->cache = $cache;
+    }
+
+    public function setGroup($group){
+        $this->group = $group;
     }
 
     private function cache(){
@@ -32,12 +43,13 @@ class Client
     }
 
     private function getApi(){
-        return $this->baseUrl . $this->week .'?Code=' . $this->class . '&OreId=' . $this->ordeId . '&AttId=' . $this->attId;
+        return $this->baseUrl . $this->code .'?Code=' . $this->group . '&OreId=' . $this->ordeId . '&AttId=' . $this->attId;
     }
 
 
     private function createForm($data)
     {
+//        $this->result = file_get_contents('rooster.html');
         $this->result = $this->client->request(
             'POST',
             $this->getApi(),
