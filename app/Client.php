@@ -17,8 +17,6 @@ class Client
     private $code = 52257;
     private $attId = 1;
 
-    private $storage = 'rooster.html';
-
     private $result;
     /**
      * @var CacheInterface
