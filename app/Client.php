@@ -43,12 +43,13 @@ class Client
     }
 
 
-    private function createForm($data)
+    private function createForm($data,$week)
     {
-        $cache = $this->cache->has('rooster', function ($cache) {
-            return $this->result = $cache->get('rooster');
-        });
+        $key = 'rooster' . $week . $this->group;
 
+        $cache = $this->cache->has($key, function ($cache) use($week,$key){
+            return $this->result = $cache->get($key);
+        });
 
         if ($cache) {
             return $this;
@@ -65,7 +66,7 @@ class Client
             ]
         )->getBody();
 
-        $this->cache->store('rooster',$data);
+        $this->cache->store($key,$data);
 
         $this->result = $data;
         return $this;
@@ -82,6 +83,6 @@ class Client
 
         return $this->createForm([
             'currentWeek' => "{$year}/{$week}"
-        ])->post();
+        ],$week)->post();
     }
 }
