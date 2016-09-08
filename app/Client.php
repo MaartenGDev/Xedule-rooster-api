@@ -2,6 +2,7 @@
 namespace App;
 
 use GuzzleHttp\ClientInterface;
+use MaartenGDev\CacheInterface;
 
 class Client
 {
@@ -33,24 +34,29 @@ class Client
         $this->cache = $cache;
     }
 
-    public function setGroup($group){
+    public function setGroup($group)
+    {
         $this->group = $group;
     }
 
-    private function cache(){
-        file_put_contents($this->storage,$this->result);
-        return $this;
-    }
-
-    private function getApi(){
-        return $this->baseUrl . $this->code .'?Code=' . $this->group . '&OreId=' . $this->ordeId . '&AttId=' . $this->attId;
+    private function getApi()
+    {
+        return $this->baseUrl . $this->code . '?Code=' . $this->group . '&OreId=' . $this->ordeId . '&AttId=' . $this->attId;
     }
 
 
     private function createForm($data)
     {
-//        $this->result = file_get_contents('rooster.html');
-        $this->result = $this->client->request(
+        $cache = $this->cache->has('rooster', function ($cache) {
+            return $this->result = $cache->get('rooster');
+        });
+
+
+        if ($cache) {
+            return $this;
+        }
+
+        $data = $this->client->request(
             'POST',
             $this->getApi(),
             [
@@ -61,19 +67,23 @@ class Client
             ]
         )->getBody();
 
+        $this->cache->store('rooster',$data);
+
+        $this->result = $data;
         return $this;
     }
 
-    private function post(){
+    private function post()
+    {
         return $this->parser->parse($this->result)->allWeek();
     }
 
-    public function getWeek($week,$year = null)
+    public function getWeek($week, $year = null)
     {
-        if($year === null) $year = date('Y');
+        if ($year === null) $year = date('Y');
 
         return $this->createForm([
             'currentWeek' => "{$year}/{$week}"
-        ])->cache()->post();
+        ])->post();
     }
 }

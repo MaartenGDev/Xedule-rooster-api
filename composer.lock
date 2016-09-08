@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "66b585f4e27786357281eac99f426181",
-    "content-hash": "76148d9a4a6f972d3c5dcae6c0dcc2cf",
+    "hash": "a0e3540994958eec7d57514505a9e6ec",
+    "content-hash": "e02112aa563ae1ee205f0fc0adac59ee",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -177,6 +177,36 @@
                 "uri"
             ],
             "time": "2016-06-24 23:00:38"
+        },
+        {
+            "name": "maartengdev/cache-drivers",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MaartenGDev/CacheDrivers.git",
+                "reference": "03e1699af61d01f93feab20fb3a32d6369e8e10c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MaartenGDev/CacheDrivers/zipball/03e1699af61d01f93feab20fb3a32d6369e8e10c",
+                "reference": "03e1699af61d01f93feab20fb3a32d6369e8e10c",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MaartenGDev\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Cache all data using different drivers",
+            "time": "2016-09-08 17:38:33"
         },
         {
             "name": "psr/http-message",

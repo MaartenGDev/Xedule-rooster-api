@@ -3,10 +3,16 @@ namespace App;
 require_once 'vendor/autoload.php';
 
 use GuzzleHttp\Client as GuzzleClient;
+use MaartenGDev\Cache;
+use MaartenGDev\LocalDriver;
 
 $guzzle = new GuzzleClient();
 $parser = new XeduleParser();
-$cache = new Cache();
+
+$dir = $_SERVER['DOCUMENT_ROOT'] . '/cache/';
+$storage = new LocalDriver($dir);
+
+$cache = new Cache($storage,5);
 $client = new Client($guzzle,$parser,$cache);
 
 
